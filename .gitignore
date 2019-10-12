@@ -1,0 +1,10 @@
+*.tmp
+*.log
+*.csv
+*.html
+*.txt
+*.gz
+*.deb
+*.json
+*.yaml
+
