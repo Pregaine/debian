@@ -7,4 +7,7 @@
 *.deb
 *.json
 *.yaml
+ta-lib/*
+*.7z
+*.zip
 
