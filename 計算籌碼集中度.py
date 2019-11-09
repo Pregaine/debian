@@ -62,7 +62,7 @@ class dbHandle:
                         twenty decimal(6, 2) NULL,
                         sixty decimal(6, 2) NULL
                         )  ON [PRIMARY]
-                        
+
                         COMMIT'''
 
         self.cur_db.execute( cmd )
@@ -71,13 +71,13 @@ class dbHandle:
 
         cmd = 'SELECT date FROM StockDB.BROKERAGE WHERE stock = \'{1}\' ' \
               'GROUP BY date ORDER BY date DESC LIMIT {0}'.format( days, num )
-              
+
         # print( cmd )
 
         self.cur_db.execute( cmd )
-        
+
         ft = self.cur_db.fetchall( )
-        
+
         date = [ elt[ 0 ] for elt in ft ]
         self.date_lst = [ val.strftime( "%Y/%m/%d" ) for val in sorted( date, reverse = True ) ]
 
@@ -115,8 +115,8 @@ class dbHandle:
 
         # in_df = in_df.round( { 'buy_sell_vol': 1, 'buy_sell_price': 1 } )
         in_df.reset_index( inplace = True )
-        in_df.rename( index = str, columns = { "brokerage": "name", 
-                                               'buy_sell_vol': 'vol', 
+        in_df.rename( index = str, columns = { "brokerage": "name",
+                                               'buy_sell_vol': 'vol',
                                                'buy_sell_price': 'price' }, inplace = True )
 
         buy_df = in_df.head( 15 ).copy()
@@ -172,7 +172,7 @@ class dbHandle:
         # start = datetime.now( )
 
         buy_chip, sell_chip, buy_vol, sell_vol, sub_security = self.GetTopBuyBetweenDay( df )
-        
+
         # end = datetime.now( )
         # print( 'group by it took: ', end-start )
 
@@ -239,7 +239,7 @@ def unit( tar_file, stock_lst, capital_df ):
 
     # db.ResetTable( 'CONCENTRATION' )
     # db.CreateTable(  )
-    
+
     chip_cols = [ '股號', '日期', '統計天數', '收盤',
 
                   '券商1', '券商2', '券商3', '券商4', '券商5', '券商6',
@@ -310,10 +310,10 @@ def unit( tar_file, stock_lst, capital_df ):
         in_df[ 'date' ] = pd.to_datetime( in_df[ 'date' ] )
 
         price_cmd = '''
-                    SELECT volume, close_price, date FROM TECH_D 
+                    SELECT volume, close_price, date FROM TECH_D
                     WHERE stock = \'{0}\' AND date between \'{1}\' and \'{2}\';
                     '''.format( stock, db.date_lst[ -1 ], db.date_lst[ 0 ] )
-                       
+
         price_df = pd.read_sql_query( price_cmd, engine )
         price_df[ 'date' ] = pd.to_datetime( price_df[ 'date' ] )
 
@@ -335,7 +335,7 @@ def unit( tar_file, stock_lst, capital_df ):
             chip_10 = db.GetConcentrateBetweenDay( day10_lst, val, capital, in_df, price_df )
             chip_20 = db.GetConcentrateBetweenDay( day20_lst, val, capital, in_df, price_df )
             chip_60 = db.GetConcentrateBetweenDay( day60_lst, val, capital, in_df, price_df )
-            
+
             date  = day01_lst[ val ][ 0 ]
 
             # print( date )
@@ -387,7 +387,7 @@ def unit( tar_file, stock_lst, capital_df ):
 
                               }, ignore_index=True )
 
-            # start = datetime.now( ) 
+            # start = datetime.now( )
 
             ChipBuy_df = chip_sort( ChipBuy_df, stock, date, price, chip_01.top15_buy, 1, chip_01.sum_vol )
             ChipBuy_df = chip_sort( ChipBuy_df, stock, date, price, chip_03.top15_buy, 3, chip_03.sum_vol )
@@ -402,10 +402,10 @@ def unit( tar_file, stock_lst, capital_df ):
             ChipSell_df = chip_sort( ChipSell_df, stock, date, price, chip_10.top15_sell, 10, chip_10.sum_vol )
             ChipSell_df = chip_sort( ChipSell_df, stock, date, price, chip_20.top15_sell, 20, chip_20.sum_vol )
             ChipSell_df = chip_sort( ChipSell_df, stock, date, price, chip_60.top15_sell, 60, chip_60.sum_vol )
-            
+
             # end = datetime.now( )
             # print( 'chip_sort it took: ', end-start )
-            
+
 
     if os.path.isfile( './籌碼集中/ChipBuy.csv' ) is False:
         with open( './籌碼集中/ChipBuy.csv', 'w', newline = '\n', encoding = 'utf8' ) as f:
@@ -456,7 +456,7 @@ if __name__ == '__main__':
     start_tmr = datetime.now( )
 
     capital = goodinfo.capital( path = './StockList_股本.csv' )
-    condition = capital.df[ '股本(億)' ] >= 20
+    condition = capital.df[ '股本(億)' ] >= 15
     capital.df = capital.df[ condition ]
 
     stock_lst = sorted( capital.df[ 'stock' ].tolist( ) )
@@ -466,4 +466,3 @@ if __name__ == '__main__':
     unit( './籌碼集中/籌碼集中_{}.xls'.format( tmr ), stock_lst, capital.df )
 
     print( datetime.now( ) - start_tmr )
-
